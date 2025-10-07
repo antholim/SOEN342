@@ -23,4 +23,6 @@ public class Records {
         this.firstClassRate = firstClassRate;
         this.secondClassRate = secondClassRate;
     }
+
+
 }
