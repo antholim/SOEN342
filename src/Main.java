@@ -11,6 +11,7 @@ public class Main {
 
     public static void main(String[] args) {
         bootstrap();
+        listOfRoutes.forEach(System.out::println);
 //        List<Record> allRoutes = Csv.load();
 //        Search search = new Search(allRoutes);
         Scanner sc = new Scanner(System.in);

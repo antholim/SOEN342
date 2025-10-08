@@ -1,7 +1,6 @@
 package entities;
 
-import enums.DaysOfWeek;
-
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
 
@@ -12,12 +11,12 @@ public class Route {
     private LocalTime departureTime;
     private LocalTime arrivalTime;
     private String trainType;
-    private HashSet<DaysOfWeek> daysOfOperation;
+    private HashSet<DayOfWeek> daysOfOperation;
     private double firstClassTicketRate;
     private double secondClassTicketRate;
 
     public Route(String routeId, String departureCity, String arrivalCity, LocalTime departureTime, LocalTime arrivalTime,
-                 String trainType, HashSet<DaysOfWeek> daysOfOperation, double firstClassTicketRate, double secondClassTicketRate) {
+                 String trainType, HashSet<DayOfWeek> daysOfOperation, double firstClassTicketRate, double secondClassTicketRate) {
         this.routeId = routeId;
         this.departureCity = departureCity;
         this.arrivalCity = arrivalCity;

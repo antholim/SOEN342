@@ -1,7 +1,6 @@
 package model;
 
-import enums.DaysOfWeek;
-
+import java.time.DayOfWeek;
 import java.time.LocalTime;
 import java.util.HashSet;
 
@@ -12,13 +11,13 @@ public class Record {
     private LocalTime departureTime;
     private LocalTime arrivalTime;
     private String trainType;
-    private HashSet<DaysOfWeek> daysOfOperation;
+    private HashSet<DayOfWeek> daysOfOperation;
     private double firstClassRate;
     private double secondClassRate;
 
     public Record(String routeId, String departureCity, String arrivalCity,
                   LocalTime departureTime, LocalTime arrivalTime,
-                  String trainType, HashSet<DaysOfWeek> daysOfOperation,
+                  String trainType, HashSet<DayOfWeek> daysOfOperation,
                   double firstClassRate, double secondClassRate) {
         this.routeId = routeId;
         this.departureCity = departureCity;
@@ -78,11 +77,11 @@ public class Record {
         this.trainType = trainType;
     }
 
-    public HashSet<DaysOfWeek> getDaysOfOperation() {
+    public HashSet<DayOfWeek> getDaysOfOperation() {
         return daysOfOperation;
     }
 
-    public void setDaysOfOperation(HashSet<DaysOfWeek> daysOfOperation) {
+    public void setDaysOfOperation(HashSet<DayOfWeek> daysOfOperation) {
         this.daysOfOperation = daysOfOperation;
     }
 
@@ -102,4 +101,18 @@ public class Record {
         this.secondClassRate = secondClassRate;
     }
 
+    @Override
+    public String toString() {
+        return "Record{" +
+                "routeId='" + routeId + '\'' +
+                ", departureCity='" + departureCity + '\'' +
+                ", arrivalCity='" + arrivalCity + '\'' +
+                ", departureTime=" + departureTime +
+                ", arrivalTime=" + arrivalTime +
+                ", trainType='" + trainType + '\'' +
+                ", daysOfOperation=" + daysOfOperation +
+                ", firstClassRate=" + firstClassRate +
+                ", secondClassRate=" + secondClassRate +
+                '}';
+    }
 }

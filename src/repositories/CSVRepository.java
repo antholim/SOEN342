@@ -1,6 +1,5 @@
 package repositories;
 
-import enums.DaysOfWeek;
 import model.Record;
 import parsers.DayParser;
 
@@ -10,7 +9,6 @@ import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 
@@ -48,7 +46,7 @@ public class CSVRepository {
             String line = null;
             while ((line = reader.readLine()) != null) {
                 String[] values = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
-                System.out.println(values[6].trim());
+//                System.out.println(values[6].trim());
                 Record route = new Record(
                         values[0].trim(),
                         values[1].trim(),
@@ -56,23 +54,10 @@ public class CSVRepository {
                         LocalTime.parse(values[3].trim(), TIME_FMT),
                         values[4].trim().contains("(+1d)") ? LocalTime.parse(values[4].trim().replace(" (+1d)", ""), TIME_FMT) .plusHours(24) : LocalTime.parse(values[4].trim()), // check moi un fou one liner
                         values[5].trim(),
-                        new HashSet<DaysOfWeek>(),
+                        dayParser.parseDays(values[6].replaceAll("^\"|\"$", "")),
                         Double.parseDouble(values[7].trim()),
                         Double.parseDouble(values[8].trim()));
 
-
-
-//                for (int i = 0; i < headers.length; i++) {
-//                    System.out.println(headers[i].trim());
-//                    if (headers[i].trim().contains("First Class ticket rate (in euro)")) { //tech debt, we should find another way to doing that - lim
-//                        route.put(Records.FIRST_CLASS_TICKET_RATE, values[i].trim());
-//                    } else if (headers[i].trim().contains("Second Class ticket rate (in euro)")) {
-//                        route.put(Records.SECOND_CLASS_TICKET_RATE, values[i].trim());
-//                    } else {
-//                        route.put(Records.valueOf(headers[i].trim().toUpperCase().replace(" ", "_")), values[i].trim());
-//                    }
-//                }
-//                System.out.println(values[6].trim());
                 routes.add(route);
             }
         } catch (IOException e) {
