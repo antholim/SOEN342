@@ -1,4 +1,5 @@
 package model;
+
 public class Records {
     private String routeId;
     private String departureCity;
