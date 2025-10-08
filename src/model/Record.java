@@ -1,6 +1,9 @@
 package model;
 
+import enums.DaysOfWeek;
+
 import java.time.LocalTime;
+import java.util.HashSet;
 
 public class Record {
     private String routeId;
@@ -9,13 +12,13 @@ public class Record {
     private LocalTime departureTime;
     private LocalTime arrivalTime;
     private String trainType;
-    private String daysOfOperation;
+    private HashSet<DaysOfWeek> daysOfOperation;
     private double firstClassRate;
     private double secondClassRate;
 
     public Record(String routeId, String departureCity, String arrivalCity,
-                  String departureTime, String arrivalTime,
-                  String trainType, String daysOfOperation,
+                  LocalTime departureTime, LocalTime arrivalTime,
+                  String trainType, HashSet<DaysOfWeek> daysOfOperation,
                   double firstClassRate, double secondClassRate) {
         this.routeId = routeId;
         this.departureCity = departureCity;
@@ -75,11 +78,11 @@ public class Record {
         this.trainType = trainType;
     }
 
-    public String getDaysOfOperation() {
+    public HashSet<DaysOfWeek> getDaysOfOperation() {
         return daysOfOperation;
     }
 
-    public void setDaysOfOperation(String daysOfOperation) {
+    public void setDaysOfOperation(HashSet<DaysOfWeek> daysOfOperation) {
         this.daysOfOperation = daysOfOperation;
     }
 

@@ -1,6 +1,8 @@
 package repositories;
 
-import entities.Route;
+import enums.DaysOfWeek;
+import model.Record;
+import parsers.DayParser;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
@@ -8,6 +10,7 @@ import java.io.IOException;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 
@@ -15,20 +18,24 @@ import java.util.List;
 public class CSVRepository {
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
     private volatile static CSVRepository instance;
-    private CSVRepository() {}
+    private DayParser dayParser;
+
+    private CSVRepository(DayParser dayParser) {
+        this.dayParser = dayParser;
+    }
 
     public static CSVRepository getInstance() {
         if (instance == null) {
             synchronized (CSVRepository.class) {
                 if (instance == null) {
-                    instance = new CSVRepository();
+                    instance = new CSVRepository(DayParser.getInstance());
                 }
             }
         }
         return instance;
     }
-    public List<Route> getRoutes(String filePath) {
-        List<Route> routes = new ArrayList<>();
+    public List<Record> getRoutes(String filePath) {
+        List<Record> routes = new ArrayList<>();
 
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String headerLine = reader.readLine();
@@ -40,15 +47,16 @@ public class CSVRepository {
 
             String line = null;
             while ((line = reader.readLine()) != null) {
-                String[] values = line.split(",");
-                Route route = new Route(
+                String[] values = line.split(",(?=(?:[^\"]*\"[^\"]*\")*[^\"]*$)", -1);
+                System.out.println(values[6].trim());
+                Record route = new Record(
                         values[0].trim(),
                         values[1].trim(),
                         values[2].trim(),
                         LocalTime.parse(values[3].trim(), TIME_FMT),
-                        LocalTime.parse(values[4].trim(), TIME_FMT),
+                        values[4].trim().contains("(+1d)") ? LocalTime.parse(values[4].trim().replace(" (+1d)", ""), TIME_FMT) .plusHours(24) : LocalTime.parse(values[4].trim()), // check moi un fou one liner
                         values[5].trim(),
-                        values[6].trim(),
+                        new HashSet<DaysOfWeek>(),
                         Double.parseDouble(values[7].trim()),
                         Double.parseDouble(values[8].trim()));
 
@@ -64,7 +72,7 @@ public class CSVRepository {
 //                        route.put(Records.valueOf(headers[i].trim().toUpperCase().replace(" ", "_")), values[i].trim());
 //                    }
 //                }
-
+//                System.out.println(values[6].trim());
                 routes.add(route);
             }
         } catch (IOException e) {
