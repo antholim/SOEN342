@@ -1,6 +1,6 @@
 import java.util.List;
 import java.util.Scanner;
-import model.Records;
+import model.Record;
 import service.Csv;
 import service.Search;
 import repositories.CSVRepository;
@@ -8,9 +8,10 @@ import java.util.Map;
 
 public class Main {
     public static CSVRepository repository = CSVRepository.getInstance();
-    public static List<Map<Records, String>> listOfRoutes;
+    public static List<Map<Record, String>> listOfRoutes;
+
     public static void main(String[] args) {
-List<Records> allRoutes = Csv.load();
+        List<Record> allRoutes = Csv.load();
         Search search = new Search(allRoutes);
         Scanner sc = new Scanner(System.in);
 
@@ -27,13 +28,13 @@ List<Records> allRoutes = Csv.load();
         String priceInput = sc.nextLine();
         Double maxPrice = priceInput.isEmpty() ? null : Double.parseDouble(priceInput);
 
-        List<Records> results = search.searchAdvanced(dep, arr, type, day, maxPrice);
+        List<Record> results = search.searchAdvanced(dep, arr, type, day, maxPrice);
 
         if (results.isEmpty()) {
             System.out.println("\nNo routes found matching all given criteria.");
         } else {
             System.out.println("\nFound " + results.size() + " matching routes:\n");
-            for (Records r : results) {
+            for (Record r : results) {
                 System.out.println(
                         r.getDepartureCity() + " → " + r.getArrivalCity() +
                         " | " + r.getDepartureTime() + "–" + r.getArrivalTime() +
@@ -44,12 +45,6 @@ List<Records> allRoutes = Csv.load();
                 );
             }
         }
-
-        for (Map<Records, String> route : listOfRoutes) {
-            System.out.println(route);
-        }
-
-        Scanner sc = new Scanner(System.in);
 
     }
 

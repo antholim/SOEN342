@@ -2,17 +2,17 @@ package service;
 
 import java.util.ArrayList;
 import java.util.List;
-import model.Records;
+import model.Record;
 
 public class Search {
 
-    private List<Records> records;
+    private List<Record> records;
 
-    public Search(List<Records> records) {
+    public Search(List<Record> records) {
         this.records = records;
     }
 
-    public List<Records> searchAdvanced(
+    public List<Record> searchAdvanced(
         String departure,
         String arrival,
         String trainType,
@@ -20,9 +20,9 @@ public class Search {
         Double maxSecondClassPrice)
     
     {
-    List<Records> results = new ArrayList<>();
+    List<Record> results = new ArrayList<>();
 
-    for (Records r : records) {
+    for (Record r : records) {
         boolean match = true;
 
         if (departure != null && !departure.isEmpty() &&

@@ -1,20 +1,22 @@
 package model;
 
-public class Records {
+import java.time.LocalTime;
+
+public class Record {
     private String routeId;
     private String departureCity;
     private String arrivalCity;
-    private String departureTime;
-    private String arrivalTime;
+    private LocalTime departureTime;
+    private LocalTime arrivalTime;
     private String trainType;
     private String daysOfOperation;
     private double firstClassRate;
     private double secondClassRate;
 
-    public Records(String routeId, String departureCity, String arrivalCity,
-                      String departureTime, String arrivalTime,
-                      String trainType, String daysOfOperation,
-                      double firstClassRate, double secondClassRate) {
+    public Record(String routeId, String departureCity, String arrivalCity,
+                  String departureTime, String arrivalTime,
+                  String trainType, String daysOfOperation,
+                  double firstClassRate, double secondClassRate) {
         this.routeId = routeId;
         this.departureCity = departureCity;
         this.arrivalCity = arrivalCity;
@@ -49,19 +51,19 @@ public class Records {
         this.arrivalCity = arrivalCity;
     }
 
-    public String getDepartureTime() {
+    public LocalTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(String departureTime) {
+    public void setDepartureTime(LocalTime departureTime) {
         this.departureTime = departureTime;
     }
 
-    public String getArrivalTime() {
+    public LocalTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(String arrivalTime) {
+    public void setArrivalTime(LocalTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 

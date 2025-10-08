@@ -21,7 +21,6 @@ public class DayParser {
     public HashSet<DayOfWeek> parseDays(String s) {
         String[] parts = s.split(",");
         HashSet<DayOfWeek> days= new HashSet<>();
-
     }
     private static DayOfWeek parseDOW(String s) {
         s = s.trim().toLowerCase();

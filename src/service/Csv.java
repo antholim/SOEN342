@@ -5,14 +5,14 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import model.Records;
+import model.Record;
 
 public class Csv {
 
     private static final String CSV_PATH = "eu_rail_network.csv";
 
-    public static List<Records> load() {
-        List<Records> recordsList = new ArrayList<>();
+    public static List<Record> load() {
+        List<Record> recordsList = new ArrayList<>();
 
         try (BufferedReader br = new BufferedReader(new FileReader(CSV_PATH))) {
             String line;
@@ -37,7 +37,7 @@ public class Csv {
                     // Remove quotes around the Days of Operation field
                     String days = fields[6].trim().replace("\"", "");
 
-                    Records record = new Records(
+                    Record record = new Record(
                             fields[0].trim(),
                             fields[1].trim(),
                             fields[2].trim(),
