@@ -1,0 +1,14 @@
+package enums;
+
+public enum Records {
+    ROUTE_ID,
+    DEPARTURE_CITY,
+    ARRIVAL_CITY,
+    DEPARTURE_TIME,
+    ARRIVAL_TIME,
+    TRAIN_TYPE,
+    DAYS_OF_OPERATION,
+    FIRST_CLASS_TICKET_RATE,
+    SECOND_CLASS_TICKET_RATE
+}
+
