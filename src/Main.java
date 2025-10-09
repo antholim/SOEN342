@@ -30,7 +30,7 @@ public class Main {
         String minTxIn = sc.nextLine().trim();
         int minTransfer = minTxIn.isBlank() ? 10 : safeInt(minTxIn, 10);
 
-        System.out.print("Max Overlays (default 2): ");
+        System.out.print("Max Connections (Min 1, max 2): ");
         String maxLegsIn = sc.nextLine().trim();
         int maxLegs = maxLegsIn.isBlank() ? 2 : safeInt(maxLegsIn, 2);
 
