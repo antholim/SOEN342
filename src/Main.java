@@ -30,9 +30,9 @@ public class Main {
         String minTxIn = sc.nextLine().trim();
         int minTransfer = minTxIn.isBlank() ? 10 : safeInt(minTxIn, 10);
 
-        System.out.print("Max Overlays (default 5): ");
+        System.out.print("Max Overlays (default 2): ");
         String maxLegsIn = sc.nextLine().trim();
-        int maxLegs = maxLegsIn.isBlank() ? 5 : safeInt(maxLegsIn, 5);
+        int maxLegs = maxLegsIn.isBlank() ? 2 : safeInt(maxLegsIn, 2);
 
         // Build connections
         ConnectionFinder finder = new ConnectionFinder(listOfRoutes);
