@@ -1,0 +1,33 @@
+
+Use Case #1:
+Primary Actor: Client
+Goal: Find train connections that match all selected criteria.
+Preconditions:
+	•	Train data (CSV) is already loaded into memory.
+
+Postconditions:
+	•	Matching connections are displayed, sorted according to the selected filter (if any).
+
+Main Success Scenario:
+	1.	Client opens the search interface.
+	2.	Client enters search parameters (departure city, arrival city, day of operation, etc.).
+	3.	Client optionally selects a sorting criterion (e.g., by duration or by price).
+	4.	System retrieves all records matching the filters.
+	5.	System calculates trip duration for each connection.
+	6.	System sorts the results according to the chosen criterion.
+	7.	System displays all matching connections to the client.
+
+
+Use Case #2:
+Primary Actor: Client
+Goal: Define the preferred sorting method for search results before executing the search.
+Preconditions:
+	•	Client is on the search interface.
+
+Postconditions:
+	•	The selected sorting criterion is applied to the results when they are displayed.
+
+Main Success Scenario :
+	1.	Client selects a sorting option (e.g., by duration, by price).
+	2.	System stores this preference temporarily.
+	3.	When the client performs the search, results are sorted automatically using the selected option.
