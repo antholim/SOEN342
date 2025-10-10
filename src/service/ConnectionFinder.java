@@ -5,11 +5,14 @@ import model.Record;
 import model.TimeUtils;
 
 import java.time.DayOfWeek;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConnectionFinder {
 
+    private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
     private final Map<String, List<Record>> routesByDepartureCity;
 
     public ConnectionFinder(List<Record> allRoutes) {
@@ -21,15 +24,68 @@ public class ConnectionFinder {
                                                   String destination,
                                                   int minTransferMinutes,
                                                   int maxConnections) {
+        return findConnections(origin, destination, minTransferMinutes, maxConnections,
+                null, null, null, null, null, null, null);
+    }
+
+    public List<List<Connection>> findConnections(String origin,
+                                                  String destination,
+                                                  int minTransferMinutes,
+                                                  int maxConnections,
+                                                  String trainType,
+                                                  String day,
+                                                  Double maxFirstClassPrice,
+                                                  Double maxSecondClassPrice,
+                                                  String minDepartureTime,
+                                                  String maxDepartureTime,
+                                                  Integer maxDuration) {
+
+        // Parse time constraints
+        LocalTime minDepTime = parseTime(minDepartureTime);
+        LocalTime maxDepTime = parseTime(maxDepartureTime);
+
+        // Parse day if provided
+        DayOfWeek searchDay = parseDay(day);
 
         List<List<Connection>> foundConnections = new ArrayList<>();
         Deque<Record> currentPath = new ArrayDeque<>();
         Set<String> visitedCities = new HashSet<>();
 
         exploreConnections(origin, destination, minTransferMinutes, maxConnections,
-                visitedCities, currentPath, foundConnections);
+                visitedCities, currentPath, foundConnections,
+                trainType, searchDay, maxFirstClassPrice, maxSecondClassPrice,
+                minDepTime, maxDepTime, maxDuration);
 
         return foundConnections;
+    }
+
+    private LocalTime parseTime(String timeStr) {
+        if (timeStr == null || timeStr.isEmpty()) {
+            return null;
+        }
+        try {
+            return LocalTime.parse(timeStr, TIME_FMT);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private DayOfWeek parseDay(String day) {
+        if (day == null || day.isEmpty() || day.equalsIgnoreCase("Daily")) {
+            return null;
+        }
+
+        String normalized = day.trim().toLowerCase();
+        return switch (normalized) {
+            case "monday", "mon" -> DayOfWeek.MONDAY;
+            case "tuesday", "tue" -> DayOfWeek.TUESDAY;
+            case "wednesday", "wed" -> DayOfWeek.WEDNESDAY;
+            case "thursday", "thu" -> DayOfWeek.THURSDAY;
+            case "friday", "fri" -> DayOfWeek.FRIDAY;
+            case "saturday", "sat" -> DayOfWeek.SATURDAY;
+            case "sunday", "sun" -> DayOfWeek.SUNDAY;
+            default -> null;
+        };
     }
 
     /**
@@ -80,7 +136,14 @@ public class ConnectionFinder {
                                     int maxConnections,
                                     Set<String> visitedCities,
                                     Deque<Record> currentPath,
-                                    List<List<Connection>> allConnections) {
+                                    List<List<Connection>> allConnections,
+                                    String trainType,
+                                    DayOfWeek searchDay,
+                                    Double maxFirstClassPrice,
+                                    Double maxSecondClassPrice,
+                                    LocalTime minDepTime,
+                                    LocalTime maxDepTime,
+                                    Integer maxDuration) {
 
         if (currentPath.size() >= maxConnections) return;
         visitedCities.add(currentCity.toLowerCase());
@@ -89,6 +152,13 @@ public class ConnectionFinder {
             String nextCity = nextRoute.getArrivalCity();
 
             if (visitedCities.contains(nextCity.toLowerCase())) continue;
+
+            // Apply filters to each leg
+            if (!matchesFilters(nextRoute, trainType, searchDay, maxFirstClassPrice,
+                    maxSecondClassPrice, minDepTime, maxDepTime, maxDuration,
+                    currentPath.isEmpty())) {
+                continue;
+            }
 
             if (!currentPath.isEmpty()) {
                 Record previousRoute = currentPath.peekLast();
@@ -110,17 +180,72 @@ public class ConnectionFinder {
                 List<Connection> validConnection = currentPath.stream()
                         .map(Connection::new)
                         .collect(Collectors.toList());
-                allConnections.add(validConnection);
-            } else {
 
+                // Final validation: check if the entire path has valid operating days
+                if (searchDay == null || getValidDaysForPath(validConnection).contains(searchDay)) {
+                    allConnections.add(validConnection);
+                }
+            } else {
                 exploreConnections(nextCity, targetCity, minTransferMinutes,
-                        maxConnections, visitedCities, currentPath, allConnections);
+                        maxConnections, visitedCities, currentPath, allConnections,
+                        trainType, searchDay, maxFirstClassPrice, maxSecondClassPrice,
+                        minDepTime, maxDepTime, maxDuration);
             }
 
             currentPath.removeLast();
         }
 
         visitedCities.remove(currentCity.toLowerCase());
+    }
+
+    /**
+     * Checks if a route matches the given filters
+     */
+    private boolean matchesFilters(Record route, String trainType, DayOfWeek searchDay,
+                                   Double maxFirstClassPrice, Double maxSecondClassPrice,
+                                   LocalTime minDepTime, LocalTime maxDepTime,
+                                   Integer maxDuration, boolean isFirstLeg) {
+
+        // Train type filter
+        if (trainType != null && !trainType.isEmpty() &&
+                !route.getTrainType().equalsIgnoreCase(trainType)) {
+            return false;
+        }
+
+        // Day of operation filter
+        if (searchDay != null && !route.getDaysOfOperation().contains(searchDay)) {
+            return false;
+        }
+
+        // First class price filter
+        if (maxFirstClassPrice != null && route.getFirstClassRate() > maxFirstClassPrice) {
+            return false;
+        }
+
+        // Second class price filter
+        if (maxSecondClassPrice != null && route.getSecondClassRate() > maxSecondClassPrice) {
+            return false;
+        }
+
+        // Departure time filters (only apply to first leg)
+        if (isFirstLeg) {
+            if (minDepTime != null && route.getDepartureTime().isBefore(minDepTime)) {
+                return false;
+            }
+            if (maxDepTime != null && route.getDepartureTime().isAfter(maxDepTime)) {
+                return false;
+            }
+        }
+
+        // Duration filter (applies to each individual leg)
+        if (maxDuration != null) {
+            long duration = TimeUtils.minutesBetween(route.getDepartureTime(), route.getArrivalTime());
+            if (duration > maxDuration) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**

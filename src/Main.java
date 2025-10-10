@@ -111,8 +111,13 @@ public class Main {
             String maxLegsIn = sc.nextLine().trim();
             int maxLegs = maxLegsIn.isBlank() ? 2 : Math.min(Math.max(safeInt(maxLegsIn, 2), 1), 2);
 
+            // Create ConnectionFinder with filters
             ConnectionFinder finder = new ConnectionFinder(listOfRoutes);
-            var connections = finder.findConnections(departure, arrival, minTransfer, maxLegs);
+            var connections = finder.findConnections(
+                    departure, arrival, minTransfer, maxLegs,
+                    trainType, day, maxFirstPrice, maxSecondPrice,
+                    minDepInput, maxDepInput, maxDuration
+            );
 
             if (connections.isEmpty()) {
                 System.out.println("\n❌ No connections found between " + departure + " and " + arrival + ".");
