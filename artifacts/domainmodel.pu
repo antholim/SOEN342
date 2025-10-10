@@ -1,0 +1,73 @@
+@startuml
+class City {
+  +name
+}
+
+class Route {
+  +departureCity
+  +arrivalCity
+  +departureTime
+  +arrivalTime
+  +trainType
+  +operatingDays
+  +firstClassFare
+  +secondClassFare
+}
+
+enum OperatingDay {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+class Connection {
+  +route
+}
+
+class Transfer {
+  +minutes
+}
+
+class Trip {
+  +connections (1..3)
+  +transfers (0..2)
+  +totalDurationMinutes
+  +totalPriceFirst
+  +totalPriceSecond
+}
+
+class SearchCriteria {
+  +origin
+  +destination
+  +trainType
+  +operatingDay
+  +maxFirstClassPrice
+  +maxSecondClassPrice
+  +minDepartureTime
+  +maxDepartureTime
+  +maxLegDuration
+  +minTransferMinutes
+  +maxConnections
+}
+
+enum SortingPreference {
+  DURATION
+  PRICE_FIRST
+  PRICE_SECOND
+}
+
+Route "0..*" --> "1" City : departure
+Route "0..*" --> "1" City : arrival
+Route "1" o-- "1..*" OperatingDay : operates on
+Connection "1" *-- "1" Route : uses
+Trip "1" *-- "1..3" Connection : consists of
+Trip "1" *-- "0..2" Transfer : has
+SearchCriteria "1" --> "1" City : origin
+SearchCriteria "1" --> "1" City : destination
+SearchCriteria "0..1" --> "1" SortingPreference : sort by
+
+@enduml
