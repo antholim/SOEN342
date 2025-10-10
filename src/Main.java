@@ -94,10 +94,10 @@ public class Main {
             displayDirectRoutes(directResults);
         } else {
             // No direct routes found - try multi-leg connections
-            System.out.println("\n⚠ No direct routes found matching your criteria.");
+            System.out.println("\nNo direct routes found matching your criteria.");
 
             if (departure.isEmpty() || arrival.isEmpty()) {
-                System.out.println("❌ Cannot search for connections without departure and arrival cities.");
+                System.out.println("Cannot search for connections without departure and arrival cities.");
                 return;
             }
 
@@ -120,7 +120,7 @@ public class Main {
             );
 
             if (connections.isEmpty()) {
-                System.out.println("\n❌ No connections found between " + departure + " and " + arrival + ".");
+                System.out.println("\nNo connections found between " + departure + " and " + arrival + ".");
             } else {
                 // Sorting menu
                 System.out.println("\nSort results by:");
