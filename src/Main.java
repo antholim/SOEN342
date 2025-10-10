@@ -1,5 +1,9 @@
+import java.time.DayOfWeek;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import model.Record;
 import model.Connection;
 import model.TimeUtils;
@@ -14,7 +18,7 @@ public class Main {
     public static void main(String[] args) {
         bootstrap();
 
-        // You can comment this out if you don’t want all routes printed
+        // You can comment this out if you don't want all routes printed
         // listOfRoutes.forEach(System.out::println);
 
         Scanner sc = new Scanner(System.in);
@@ -30,9 +34,10 @@ public class Main {
         String minTxIn = sc.nextLine().trim();
         int minTransfer = minTxIn.isBlank() ? 10 : safeInt(minTxIn, 10);
 
-        System.out.print("Max Connections (Min 1, max 2): ");
+        System.out.print("Max Connections (0=direct, 1=one stop, 2=two stops, default 2): ");
         String maxLegsIn = sc.nextLine().trim();
-        int maxLegs = maxLegsIn.isBlank() ? 2 : safeInt(maxLegsIn, 2);
+        int maxConnections = maxLegsIn.isBlank() ? 2 : safeInt(maxLegsIn, 2);
+        int maxLegs = maxConnections + 1; // Convert connections to legs
 
         // Build connections
         ConnectionFinder finder = new ConnectionFinder(listOfRoutes);
@@ -67,43 +72,6 @@ public class Main {
             printPath(pathList);
             System.out.println();
         }
-
-
-        // -----------------------------------------------------------------------
-        /*
-        List<Record> allRoutes = Csv.load();
-        Search search = new Search(allRoutes);
-        System.out.println("=== Advanced Connection Search ===");
-        System.out.print("Departure city (or leave blank): ");
-        String dep = sc.nextLine();
-        System.out.print("Arrival city (or leave blank): ");
-        String arr = sc.nextLine();
-        System.out.print("Train type (or leave blank): ");
-        String type = sc.nextLine();
-        System.out.print("Day of operation (e.g. Mon, Fri, Daily) (or leave blank): ");
-        String day = sc.nextLine();
-        System.out.print("Max 2nd class price (or leave blank): ");
-        String priceInput = sc.nextLine();
-        Double maxPrice = priceInput.isEmpty() ? null : Double.parseDouble(priceInput);
-
-        List<Record> results = search.searchAdvanced(dep, arr, type, day, maxPrice);
-
-        if (results.isEmpty()) {
-            System.out.println("\nNo routes found matching all given criteria.");
-        } else {
-            System.out.println("\nFound " + results.size() + " matching routes:\n");
-            for (Record r : results) {
-                System.out.println(
-                        r.getDepartureCity() + " → " + r.getArrivalCity() +
-                        " | " + r.getDepartureTime() + "–" + r.getArrivalTime() +
-                        " | " + r.getTrainType() +
-                        " | " + r.getDaysOfOperation() +
-                        " | 1st: " + r.getFirstClassRate() + "€" +
-                        " | 2nd: " + r.getSecondClassRate() + "€"
-                );
-            }
-        }
-        */
     }
 
     public static void bootstrap() {
@@ -119,6 +87,11 @@ public class Main {
             System.out.println("(empty path)");
             return;
         }
+
+        // Display valid days for the entire journey
+        Set<DayOfWeek> validDays = ConnectionFinder.getValidDaysForPath(path);
+        System.out.println("  Valid Days: " + formatDays(validDays));
+        System.out.println();
 
         for (int i = 0; i < path.size(); i++) {
             Connection c = path.get(i);
@@ -139,5 +112,34 @@ public class Main {
         System.out.printf ("  Total duration: %d min%n", totalMinutes);
         System.out.printf ("  1st class total: €%.2f%n", totalFirst);
         System.out.printf ("  2nd class total: €%.2f%n", totalSecond);
+    }
+
+    /**
+     * Formats a set of days for display
+     */
+    private static String formatDays(Set<DayOfWeek> days) {
+        if (days.isEmpty()) {
+            return "None (Invalid connection)";
+        }
+        if (days.size() == 7) {
+            return "Daily";
+        }
+
+        return days.stream()
+                .sorted()
+                .map(Main::formatDay)
+                .collect(Collectors.joining(", "));
+    }
+
+    private static String formatDay(DayOfWeek day) {
+        return switch (day) {
+            case MONDAY -> "Mon";
+            case TUESDAY -> "Tue";
+            case WEDNESDAY -> "Wed";
+            case THURSDAY -> "Thu";
+            case FRIDAY -> "Fri";
+            case SATURDAY -> "Sat";
+            case SUNDAY -> "Sun";
+        };
     }
 }
