@@ -1,2 +1,6 @@
 trip_id,ticket_number,first_name,last_name,age,traveller_id,departure_city,arrival_city,departure_time,arrival_time,train_type,days_of_operation,first_class_rate,second_class_rate
 DBEJ1R33L7,100000000,Andrew,Ungureanu,21,1234,Paris,London,12:15,20:08,InterCity,"Tue,Thu",145.00,111.00
+C9A6RF2HBX,100000000,Andrew,Ungureanu,21,1234,Paris,London,12:15,20:08,InterCity,"Tue,Thu",145.00,111.00
+C9A6RF2HBX,100000001,Victor,Taing,21,12345,Paris,London,12:15,20:08,InterCity,"Tue,Thu",145.00,111.00
+C9A6RF2HBX,100000002,Anthony Lim,Lim,22,123456,Paris,London,12:15,20:08,InterCity,"Tue,Thu",145.00,111.00
+C9A6RF2HBX,100000003,Get,Mamaw,24,1234567,Paris,London,12:15,20:08,InterCity,"Tue,Thu",145.00,111.00

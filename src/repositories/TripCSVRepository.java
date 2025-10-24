@@ -131,6 +131,30 @@ public class TripCSVRepository {
     }
 
     /**
+     * Finds all trips for a traveller by last name and ID
+     */
+    public List<Trip> findTripsByTraveller(String lastName, String travellerId) {
+        List<Trip> allTrips = loadTrips();
+        List<Trip> matchingTrips = new ArrayList<>();
+
+        for (Trip trip : allTrips) {
+            boolean hasMatch = false;
+            for (Reservation reservation : trip.reservations()) {
+                Traveller t = reservation.traveller();
+                if (t.lastName().equalsIgnoreCase(lastName) && t.id().equals(travellerId)) {
+                    hasMatch = true;
+                    break;
+                }
+            }
+            if (hasMatch) {
+                matchingTrips.add(trip);
+            }
+        }
+
+        return matchingTrips;
+    }
+
+    /**
      * Formats a reservation as a CSV line
      */
     private String formatReservationAsCSV(String tripId, Reservation reservation) {

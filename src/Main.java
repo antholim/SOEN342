@@ -31,27 +31,13 @@ public class Main {
             System.out.println("╚════════════════════════════════════════╝");
 
             System.out.println("1. Route Search");
-            System.out.println("2. View All Trips");
+            System.out.println("2. View My Trips");
             System.out.println("Enter choice (1-2), or any other key to exit: ");
             String value = sc.nextLine().trim();
             if (value.equals("1")) {
                 performSearch();
             } else if (value.equals("2")) {
-                System.out.println("\n=== All Booked Trips ===\n");
-                List<Trip> trips = tripRepo.loadTrips();
-                if (trips.isEmpty()) {
-                    System.out.println("No trips booked yet.");
-                } else {
-                    for (Trip t : trips) {
-                        System.out.println("Trip ID: " + t.tripId());
-                        for (var r : t.reservations()) {
-                            System.out.printf("  - %s %s (age %d): Ticket #%d%n",
-                                    r.traveller().firstName(), r.traveller().lastName(),
-                                    r.traveller().age(), r.ticket().number());
-                        }
-                        System.out.println();
-                    }
-                }
+                viewMyTrips();
             } else {
                 running = false;
             }
@@ -59,6 +45,51 @@ public class Main {
 
         System.out.println("\nThank you for using EU Rail Network Search System!");
         sc.close();
+    }
+
+    private static void viewMyTrips() {
+        System.out.println("\n=== View My Trips ===\n");
+        
+        System.out.print("Enter your last name: ");
+        String lastName = sc.nextLine().trim();
+        
+        System.out.print("Enter your ID (passport/gov): ");
+        String travellerId = sc.nextLine().trim();
+        
+        if (lastName.isEmpty() || travellerId.isEmpty()) {
+            System.out.println("Both last name and ID are required.");
+            return;
+        }
+        
+        List<Trip> myTrips = tripRepo.findTripsByTraveller(lastName, travellerId);
+        
+        if (myTrips.isEmpty()) {
+            System.out.println("\nNo trips found for " + lastName + " with ID " + travellerId + ".");
+        } else {
+            System.out.println("\n✓ Found " + myTrips.size() + " trip(s) for " + lastName + ":\n");
+            for (Trip trip : myTrips) {
+                System.out.println("╔═══════════════════════════════════════╗");
+                System.out.println("║  Trip ID: " + trip.tripId() + "           ║");
+                System.out.println("╚═══════════════════════════════════════╝");
+                
+                for (var r : trip.reservations()) {
+                    Traveller t = r.traveller();
+                    Connection c = r.connection();
+                    
+                    System.out.println("  Passenger: " + t.firstName() + " " + t.lastName() + 
+                                     " (age " + t.age() + ", ID: " + t.id() + ")");
+                    System.out.println("  Ticket #: " + r.ticket().number());
+                    System.out.println("  Route: " + c.from() + " → " + c.to());
+                    System.out.println("  Departure: " + c.depTime() + " | Arrival: " + c.arrTime());
+                    System.out.println("  Train: " + c.trainType());
+                    System.out.println("  Days: " + formatDaysOfWeek(c.daysOfOperation().toString()));
+                    System.out.printf("  Price: 1st class €%.2f | 2nd class €%.2f%n", 
+                                    c.firstRate(), c.secondRate());
+                    System.out.println("  ─────────────────────────────────────────");
+                }
+                System.out.println();
+            }
+        }
     }
 
     private static void performSearch() {
