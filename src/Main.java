@@ -6,7 +6,7 @@ import model.TimeUtils;
 import model.Trip;
 import model.Traveller;
 import repositories.CSVRepository;
-import repositories.InMemoryTripRepository;
+import repositories.TripCSVRepository;
 import repositories.ClientRepository;
 import service.ConnectionFinder;
 import service.ConnectionSorter;
@@ -17,7 +17,7 @@ public class Main {
     public static CSVRepository repository = CSVRepository.getInstance();
     public static List<Record> listOfRoutes;
     public static Scanner sc = new Scanner(System.in);
-    public static InMemoryTripRepository tripRepo = new InMemoryTripRepository();
+    public static TripCSVRepository tripRepo = new TripCSVRepository("src/data/trips.csv");
     public static ClientRepository clientRepo = new ClientRepository();
     public static BookingService booking = new BookingService(tripRepo, clientRepo);
 
@@ -33,16 +33,12 @@ public class Main {
             System.out.println("1. Route Search");
             System.out.println("2. View All Trips");
             System.out.println("Enter choice (1-2), or any other key to exit: ");
-//            performSearch();
             String value = sc.nextLine().trim();
             if (value.equals("1")) {
                 performSearch();
-//                System.out.print("\nSearch again? (y/n): ");
-//                String again = sc.nextLine().trim().toLowerCase();
-//                running = again.equals("y") || again.equals("yes");
             } else if (value.equals("2")) {
                 System.out.println("\n=== All Booked Trips ===\n");
-                List<Trip> trips = tripRepo.all();
+                List<Trip> trips = tripRepo.loadTrips();
                 if (trips.isEmpty()) {
                     System.out.println("No trips booked yet.");
                 } else {
@@ -56,11 +52,9 @@ public class Main {
                         System.out.println();
                     }
                 }
-
             } else {
                 running = false;
             }
-
         }
 
         System.out.println("\nThank you for using EU Rail Network Search System!");
@@ -230,6 +224,10 @@ public class Main {
         System.out.println("Loading EU Rail Network data...");
         listOfRoutes = repository.getRoutes("src/data/eu_rail_network.csv");
         System.out.println("✓ Loaded " + listOfRoutes.size() + " routes.");
+        
+        System.out.println("Loading existing trips...");
+        List<Trip> existingTrips = tripRepo.loadTrips();
+        System.out.println("✓ Loaded " + existingTrips.size() + " trips.");
     }
 
     private static int safeInt(String s, Integer fallback) {
@@ -322,7 +320,7 @@ public class Main {
     }
 
     private static void printBooking(Trip trip, String kind, String route) {
-        System.out.println("\n Trip booked (" + kind + ")");
+        System.out.println("\n✓ Trip booked (" + kind + ")");
         System.out.println("Trip ID: " + trip.tripId());
         System.out.println("Route  : " + route);
         System.out.println("Reservations / Tickets:");

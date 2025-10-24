@@ -6,16 +6,16 @@ import model.Ticket;
 import model.Trip;
 import model.Traveller;
 import repositories.ClientRepository;
-import repositories.InMemoryTripRepository;
+import repositories.TripCSVRepository; // Change this import
 
 import java.util.List;
 import java.util.StringJoiner;
 
 public class BookingService {
-    private final InMemoryTripRepository tripRepo;
+    private final TripCSVRepository tripRepo; // Change type
     private final ClientRepository clientRepo;
 
-    public BookingService(InMemoryTripRepository tripRepo, ClientRepository clientRepo) {
+    public BookingService(TripCSVRepository tripRepo, ClientRepository clientRepo) { // Change parameter type
         this.tripRepo = tripRepo;
         this.clientRepo = clientRepo;
     }
@@ -42,7 +42,7 @@ public class BookingService {
             var reservation = new Reservation(traveller, connectionAnchor, ticket);
             t.addReservation(reservation);
         }
-        tripRepo.save(t);
+        tripRepo.saveTrip(t); // Changed from save() to saveTrip()
         return t;
     }
 }
