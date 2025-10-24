@@ -30,11 +30,37 @@ public class Main {
             System.out.println("║   EU RAIL NETWORK SEARCH SYSTEM        ║");
             System.out.println("╚════════════════════════════════════════╝");
 
-            performSearch();
+            System.out.println("1. Route Search");
+            System.out.println("2. View All Trips");
+            System.out.println("Enter choice (1-2), or any other key to exit: ");
+//            performSearch();
+            String value = sc.nextLine().trim();
+            if (value.equals("1")) {
+                performSearch();
+//                System.out.print("\nSearch again? (y/n): ");
+//                String again = sc.nextLine().trim().toLowerCase();
+//                running = again.equals("y") || again.equals("yes");
+            } else if (value.equals("2")) {
+                System.out.println("\n=== All Booked Trips ===\n");
+                List<Trip> trips = tripRepo.all();
+                if (trips.isEmpty()) {
+                    System.out.println("No trips booked yet.");
+                } else {
+                    for (Trip t : trips) {
+                        System.out.println("Trip ID: " + t.tripId());
+                        for (var r : t.reservations()) {
+                            System.out.printf("  - %s %s (age %d): Ticket #%d%n",
+                                    r.traveller().firstName(), r.traveller().lastName(),
+                                    r.traveller().age(), r.ticket().number());
+                        }
+                        System.out.println();
+                    }
+                }
 
-            System.out.print("\nSearch again? (y/n): ");
-            String again = sc.nextLine().trim().toLowerCase();
-            running = again.equals("y") || again.equals("yes");
+            } else {
+                running = false;
+            }
+
         }
 
         System.out.println("\nThank you for using EU Rail Network Search System!");
