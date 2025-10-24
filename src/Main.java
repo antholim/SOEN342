@@ -3,15 +3,23 @@ import java.util.Scanner;
 import model.Record;
 import model.Connection;
 import model.TimeUtils;
+import model.Trip;
+import model.Traveller;
 import repositories.CSVRepository;
+import repositories.InMemoryTripRepository;
+import repositories.ClientRepository;
 import service.ConnectionFinder;
 import service.ConnectionSorter;
 import service.AdvancedSearch;
+import service.BookingService;
 
 public class Main {
     public static CSVRepository repository = CSVRepository.getInstance();
     public static List<Record> listOfRoutes;
     public static Scanner sc = new Scanner(System.in);
+    public static InMemoryTripRepository tripRepo = new InMemoryTripRepository();
+    public static ClientRepository clientRepo = new ClientRepository();
+    public static BookingService booking = new BookingService(tripRepo, clientRepo);
 
     public static void main(String[] args) {
         bootstrap();
@@ -67,7 +75,6 @@ public class Main {
         String maxDurInput = sc.nextLine().trim();
         Integer maxDuration = maxDurInput.isEmpty() ? null : safeInt(maxDurInput, null);
 
-        // First try: Advanced search for direct routes
         AdvancedSearch search = new AdvancedSearch(listOfRoutes);
         List<Record> directResults = search.searchAdvanced(
                 departure, arrival, trainType, day,
@@ -76,10 +83,8 @@ public class Main {
         );
 
         if (!directResults.isEmpty()) {
-            // Found direct routes
             System.out.println("\n✓ Found " + directResults.size() + " direct route(s):\n");
 
-            // Sort options
             System.out.println("Sort results by:");
             System.out.println("  0) No sorting");
             System.out.println("  1) Departure time");
@@ -92,8 +97,18 @@ public class Main {
             directResults = AdvancedSearch.sortResults(directResults, sortChoice);
 
             displayDirectRoutes(directResults);
+
+            System.out.print("\nBook one of these direct routes? (y/n): ");
+            String book = sc.nextLine().trim().toLowerCase();
+            if (book.equals("y") || book.equals("yes")) {
+                int choice = askIndex("Enter route # to book (1-" + directResults.size() + "): ", 1, directResults.size());
+                Record selected = directResults.get(choice - 1);
+                var travellers = collectTravellers();
+                Trip trip = booking.bookDirect(travellers, selected);
+                printBooking(trip, "Direct", selected.getDepartureCity() + " → " + selected.getArrivalCity());
+                return;
+            }
         } else {
-            // No direct routes found - try multi-leg connections
             System.out.println("\nNo direct routes found matching your criteria.");
 
             if (departure.isEmpty() || arrival.isEmpty()) {
@@ -111,7 +126,6 @@ public class Main {
             String maxLegsIn = sc.nextLine().trim();
             int maxLegs = maxLegsIn.isBlank() ? 2 : Math.min(Math.max(safeInt(maxLegsIn, 2), 1), 2);
 
-            // Create ConnectionFinder with filters
             ConnectionFinder finder = new ConnectionFinder(listOfRoutes);
             var connections = finder.findConnections(
                     departure, arrival, minTransfer, maxLegs,
@@ -122,7 +136,6 @@ public class Main {
             if (connections.isEmpty()) {
                 System.out.println("\nNo connections found between " + departure + " and " + arrival + ".");
             } else {
-                // Sorting menu
                 System.out.println("\nSort results by:");
                 System.out.println("  0) No sorting");
                 System.out.println("  1) Total duration");
@@ -135,7 +148,7 @@ public class Main {
                     case "1" -> ConnectionSorter.sortByDuration(connections);
                     case "2" -> ConnectionSorter.sortByFirstClassPrice(connections);
                     case "3" -> ConnectionSorter.sortBySecondClassPrice(connections);
-                    default -> {} // No sorting
+                    default -> {}
                 }
 
                 System.out.println("\n✓ Total Connection(s): " + connections.size() + "\n");
@@ -147,6 +160,17 @@ public class Main {
                     System.out.println("╚═══════════════════════════════════════╝");
                     printPath(pathList);
                     System.out.println();
+                }
+
+                System.out.print("Book one of these connections? (y/n): ");
+                String bookConn = sc.nextLine().trim().toLowerCase();
+                if (bookConn.equals("y") || bookConn.equals("yes")) {
+                    int which = askIndex("Enter route # to book (1-" + connections.size() + "): ", 1, connections.size());
+                    var pathToBook = connections.get(which - 1);
+                    var travellers = collectTravellers();
+                    Trip trip = booking.bookConnection(travellers, pathToBook);
+                    printBooking(trip, "Connection", pathToBook.get(0).from() + " → " + pathToBook.get(pathToBook.size() - 1).to());
+                    return;
                 }
             }
         }
@@ -243,5 +267,43 @@ public class Main {
                 totalMinutes, totalMinutes / 60.0);
         System.out.printf ("  1st class total: €%.2f%n", totalFirst);
         System.out.printf ("  2nd class total: €%.2f%n", totalSecond);
+    }
+
+    private static int askIndex(String prompt, int min, int max) {
+        while (true) {
+            System.out.print(prompt);
+            try {
+                int v = Integer.parseInt(sc.nextLine().trim());
+                if (v >= min && v <= max) return v;
+            } catch (Exception ignored) {}
+            System.out.println("Please enter a number between " + min + " and " + max + ".");
+        }
+    }
+
+    private static java.util.List<Traveller> collectTravellers() {
+        System.out.print("Number of travellers: ");
+        int n = safeInt(sc.nextLine().trim(), 1);
+        java.util.List<Traveller> list = new java.util.ArrayList<>();
+        for (int i = 1; i <= n; i++) {
+            System.out.println("Traveller " + i + ":");
+            System.out.print("  First name: "); String fn = sc.nextLine().trim();
+            System.out.print("  Last  name: "); String ln = sc.nextLine().trim();
+            System.out.print("  Age: "); int age = safeInt(sc.nextLine().trim(), 25);
+            System.out.print("  ID (passport/gov): "); String pid = sc.nextLine().trim();
+            list.add(new Traveller(fn, ln, age, pid));
+        }
+        return list;
+    }
+
+    private static void printBooking(Trip trip, String kind, String route) {
+        System.out.println("\n Trip booked (" + kind + ")");
+        System.out.println("Trip ID: " + trip.tripId());
+        System.out.println("Route  : " + route);
+        System.out.println("Reservations / Tickets:");
+        for (var r : trip.reservations()) {
+            System.out.printf("  - %s %s (age %d): Ticket #%d%n",
+                    r.traveller().firstName(), r.traveller().lastName(),
+                    r.traveller().age(), r.ticket().number());
+        }
     }
 }
