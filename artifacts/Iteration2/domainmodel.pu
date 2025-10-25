@@ -1,0 +1,92 @@
+@startuml
+
+class City {
+  +name: String
+}
+
+class Route {
+  +routeId: String
+  +departureCity: String
+  +arrivalCity: String
+  +departureTime: LocalTime
+  +arrivalTime: LocalTime
+  +trainType: String
+  +operatingDays: Set<DayOfWeek>
+  +firstClassFare: double
+  +secondClassFare: double
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+class Connection {
+  +route: Route
+}
+
+class Trip {
+  +tripId: String
+  +reservations: List<Reservation>
+}
+
+class Reservation {
+  +traveller: Traveller
+  +connection: Connection
+  +ticket: Ticket
+}
+
+class Traveller {
+  +firstName: String
+  +lastName: String
+  +age: int
+  +id: String
+}
+
+class Ticket {
+  +number: long
+}
+
+class SearchCriteria {
+  +origin: String
+  +destination: String
+  +trainType: String
+  +operatingDay: DayOfWeek
+  +maxFirstClassPrice: double
+  +maxSecondClassPrice: double
+  +minDepartureTime: LocalTime
+  +maxDepartureTime: LocalTime
+  +maxLegDuration: int
+  +minTransferMinutes: int
+  +maxConnections: int
+}
+
+enum SortingPreference {
+  DEPARTURE_TIME
+  DURATION
+  PRICE_FIRST
+  PRICE_SECOND
+}
+
+' Relationships
+Route "0..*" --> "1" City : departure
+Route "0..*" --> "1" City : arrival
+Route "1" o-- "1..*" DayOfWeek : operates on
+
+Connection "1" *-- "1" Route : uses
+
+Trip "1" *-- "1..*" Reservation : contains
+Reservation "1" *-- "1" Traveller : for
+Reservation "1" *-- "1" Connection : on
+Reservation "1" *-- "1" Ticket : documented by
+
+SearchCriteria "1" --> "1" City : origin
+SearchCriteria "1" --> "1" City : destination
+SearchCriteria "0..1" --> "1" SortingPreference : sort by
+
+@enduml
