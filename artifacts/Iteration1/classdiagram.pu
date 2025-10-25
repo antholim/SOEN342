@@ -32,44 +32,6 @@ package model {
         + secondRate(): double
         + toString(): String
     }
-
-        class Trip {
-        - tripId: String
-        - reservations: List~Reservation~
-        + Trip(tripId: String)
-        + addReservation(reservation: Reservation): void
-        + reservations(): List~Reservation~
-        + tripId(): String
-    }
-
-    class Reservation {
-        - traveller: Traveller
-        - connection: Connection
-        - ticket: Ticket
-        + Reservation(traveller: Traveller, connection: Connection, ticket: Ticket)
-        + traveller(): Traveller
-        + connection(): Connection
-        + ticket(): Ticket
-    }
-      class Ticket {
-    - number: long
-    + Ticket(number: long)
-    + number(): long
-  }
-
-  class Traveller {
-    - firstName: String
-    - lastName: String
-    - age: int
-    - id: String
-    + Traveller(firstName: String, lastName: String, age: int, id: String)
-    + firstName(): String
-    + lastName(): String
-    + age(): int
-    + id(): String
-    + equals(o: Object): boolean
-    + hashCode(): int
-  }
 }
 
 package parsers {
@@ -84,21 +46,6 @@ package repositories {
         + loadRecords(String): List<Record>
         + saveRecords(String, List<Record>): void
     }
-    class TripCSVRepository {
-        - dayParser : parsers.DayParser
-        + TripCSVRepository(filePath: String)
-        + loadRecords(context: String) : List<Trip>
-        + saveTrip(trip: Trip) : void
-        + saveRecords(context: String, records: List) : void
-    }
-      class ClientRepository {
-    - clients : Set<Traveller>
-    + ClientRepository()
-    + save(t: Traveller) : void
-    + exists(t: Traveller) : boolean
-    + count() : int
-    + findAll() : Set<Traveller>
-  }
 }
 
 package service {
@@ -112,14 +59,6 @@ package service {
     class Search {
         + search(String, String): List<Connection>
     }
-      class BookingService {
-    - tripRepo : repositories.TripCSVRepository
-    - clientRepo : repositories.ClientRepository
-    + BookingService(tripRepo: TripCSVRepository, clientRepo: ClientRepository)
-    + bookDirect(travellers: List\<Traveller\>, r: Record) : Trip
-    + bookConnection(travellers: List\<Connection\>, legs: List\<Connection\>) : Trip
-    - persist(travellers: List\<Traveller\>, itinerary: String, connectionAnchor: Connection) : Trip
-  }
 }
 
 class Main {
@@ -129,9 +68,6 @@ class Main {
 ' Relationships
 Main --> CSVRepository
 Main --> Search
-Main --> BookingService
-Main --> ClientRepository
-Main --> TripCSVRepository
 CSVRepository --> Record
 Connection --> Record
 ConnectionFinder --> Connection
@@ -139,14 +75,5 @@ ConnectionSorter --> Connection
 Search --> ConnectionFinder
 Search --> ConnectionSorter
 CSVRepository --> DayParser
-TripCSVRepository ..> Record : "load/save"
-TripCSVRepository ..> Trip : "groups reservations into"
-TripCSVRepository ..> Connection : "uses"
-BookingService --> TripCSVRepository : uses
-BookingService ..> ClientRepository : uses
-BookingService ..> Trip : creates
-BookingService ..> Traveller : uses
-BookingService ..> Connection : uses
-BookingService ..> Reservation : creates
-BookingService ..> Ticket : creates
+
 @enduml
