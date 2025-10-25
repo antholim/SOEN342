@@ -1,0 +1,107 @@
+Use Case #0: Load Records
+Primary Actor: System
+Goal: Load train routes from a CSV file into system memory.
+Preconditions:
+  • CSV file with route data exists and is accessible.
+  • CSV file format is valid.
+
+Postconditions:
+  • All routes are loaded into a catalog in working memory.
+  • System is ready to process search queries.
+
+Main Success Scenario:
+  1. System reads the CSV file line by line.
+  2. System parses each record (route information).
+  3. System creates Record objects for each valid entry.
+  4. System stores all records in the routes catalog.
+  5. System confirms successful loading with route count.
+
+----------------------------------------------------------------------------
+
+Use Case #1: Search for Connections
+Primary Actor: Client
+Goal: Find train connections that match selected search criteria.
+Preconditions:
+  • Train route data (CSV) is already loaded into memory.
+
+Postconditions:
+  • Matching connections are displayed to the client.
+  • Results can be sorted according to client preference.
+  • Client can proceed to book a selected connection.
+
+Main Success Scenario:
+  1. Client opens the search interface.
+  2. Client enters search parameters (departure city, arrival city, day of 
+     operation, train type, max prices, departure time range, max duration).
+  3. System searches for direct routes matching all criteria.
+  4. If direct routes found, client selects sorting option and system displays 
+     sorted results.
+  5. If no direct routes found, system searches for multi-leg connections 
+     (1-stop and 2-stop) considering transfer times and day compatibility.
+  6. Client optionally selects sorting criterion.
+  7. System displays all matching connections with leg details, transfer times, 
+     and totals.
+  8. Client can proceed to book a connection or exit search.
+
+----------------------------------------------------------------------------
+
+Use Case #2: Book a Trip
+Primary Actor: Client
+Goal: Book a trip for one or more travellers on a selected connection.
+Preconditions:
+  • Client has performed a search and identified a desired connection.
+  • Connection has available capacity (assumed unlimited in this iteration).
+
+Postconditions:
+  • A trip is created with a unique alphanumeric ID.
+  • One or more reservations are created (one per traveller).
+  • Each reservation is documented by a ticket with a unique numerical ID.
+  • All travellers are registered as clients in the system.
+  • Trip is persisted to CSV file for future retrieval.
+  • System displays booking confirmation.
+
+Main Success Scenario:
+  1. Client indicates desire to book a specific connection from search results.
+  2. System prompts for number of travellers.
+  3. For each traveller, system collects name, age, and ID.
+  4. System generates a unique trip ID.
+  5. For each traveller, system creates a reservation with a unique ticket number.
+  6. System saves the trip to persistent storage.
+  7. System displays booking confirmation with trip ID, route, and ticket numbers.
+
+Scenario 1 - Family of Four:
+  • Four family members enter their credentials (names, ages, IDs).
+  • Client selects desired connection.
+  • System books a single trip containing four reservations.
+  • Each reservation has a unique ticket.
+  • All four reservations reference the same connection.
+  • Trip has one unique trip ID.
+
+Scenario 2 - Solo Traveller:
+  • One person enters their credentials.
+  • Client selects desired connection.
+  • System books a trip containing a single reservation.
+  • One ticket is issued.
+  • Trip has one unique trip ID.
+
+----------------------------------------------------------------------------
+
+Use Case #3: View Trips
+Primary Actor: Client
+Goal: View all trips associated with a client's credentials.
+Preconditions:
+  • Client has valid credentials (last name and ID).
+  • System has access to trip records (CSV file).
+
+Postconditions:
+  • All trips for the client are displayed.
+  • Trips are categorized as current (today or future) or past (history).
+
+Main Success Scenario:
+  1. Client selects "View My Trips" option.
+  2. System prompts for client credentials (last name and ID).
+  3. Client enters credentials.
+  4. System searches for all trips containing a reservation with matching credentials.
+  5. System displays all matching trips with trip ID, passenger details, ticket 
+     numbers, route information, and pricing.
+  6. Client reviews trip information.

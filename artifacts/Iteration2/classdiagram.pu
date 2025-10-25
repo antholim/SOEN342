@@ -1,0 +1,79 @@
+@startuml
+
+package model {
+    class Record {
+        - routeId: String
+        - departureCity: String
+        - arrivalCity: String
+        - departureTime: LocalTime
+        - arrivalTime: LocalTime
+        - trainType: String
+        - daysOfOperation: HashSet<DayOfWeek>
+        - firstClassTicketRate: double
+        - secondClassTicketRate: double
+        + getRouteId(): String
+        + getDepartureCity(): String
+        + getArrivalCity(): String
+        + getDepartureTime(): LocalTime
+        + getArrivalTime(): LocalTime
+        + getTrainType(): String
+        + getDaysOfOperation(): HashSet<DayOfWeek>
+        + getFirstClassRate(): double
+        + getSecondClassRate(): double
+    }
+    class Connection {
+        - record: Record
+        + Connection(record: Record)
+        + from(): String
+        + to(): String
+        + depTime(): LocalTime
+        + arrTime(): LocalTime
+        + firstRate(): double
+        + secondRate(): double
+        + toString(): String
+    }
+}
+
+package parsers {
+    class DayParser {
+        + parseDays(String): HashSet<DayOfWeek>
+        <<static>>
+    }
+}
+
+package repositories {
+    class CSVRepository {
+        + loadRecords(String): List<Record>
+        + saveRecords(String, List<Record>): void
+    }
+}
+
+package service {
+    class ConnectionFinder {
+        + findConnections(String, String): List<Connection>
+    }
+    class ConnectionSorter {
+        + sortByDeparture(List<Connection>): List<Connection>
+        + sortByArrival(List<Connection>): List<Connection>
+    }
+    class Search {
+        + search(String, String): List<Connection>
+    }
+}
+
+class Main {
+    + main(String[]): void
+}
+
+' Relationships
+Main --> CSVRepository
+Main --> Search
+CSVRepository --> Record
+Connection --> Record
+ConnectionFinder --> Connection
+ConnectionSorter --> Connection
+Search --> ConnectionFinder
+Search --> ConnectionSorter
+CSVRepository --> DayParser
+
+@enduml

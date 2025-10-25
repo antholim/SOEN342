@@ -1,0 +1,26 @@
+@startuml
+participant Console
+participant ":RoutesFinder"
+participant ":RoutesDB"
+
+note left of Console
+Contract CO1: findConnections
+Operation: findConnections(origin: String, destination: String, 
+minTransfer: int, maxLegs: int, trainType: String, day: String, 
+maxFirstPrice: double, maxSecondPrice: double, minDepInput: String, 
+maxDepInput: String, maxDuration: int): List<List<Connection>>
+Cross References: Use Case: Find Train Connections
+Preconditions:
+- The list of routes (listOfRoutes) has been loaded from the CSV file.
+- The user has provided valid input for origin and destination cities.
+- minTransfer and maxLegs are valid integers (minTransfer ≥ 0, 1 ≤ maxLegs ≤ 2).
+Postconditions:
+- Returns a list of possible connection paths (each path is a list of Connection objects) from the origin to the destination, satisfying all constraints.
+- If no connections are found, returns an empty list.
+end note
+
+Console -> ":RoutesFinder" : findConnections(departure, arrival, minTransfer, maxLegs, trainType, day, maxFirstPrice, maxSecondPrice, minDepInput, maxDepInput, maxDuration)
+":RoutesFinder" -> ":RoutesDB" : getRoutes()
+":RoutesDB" --> ":RoutesFinder" : listOfRoutes
+":RoutesFinder" --> Console : connections
+@enduml

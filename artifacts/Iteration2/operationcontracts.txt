@@ -19,14 +19,29 @@ Preconditions:
 Postconditions:
 -The list of connections is sorted in-place according to the selected criterion (total duration, first class price, or second class price).
 
-
-Contract CO3: accessTerminal
-Operation: accessTerminal(): void
-Cross References: Use Case: User Interacts with Terminal
+Contract CO3: bookTrip
+Operation: bookTrip(travellers: List<Traveller>, connection: Connection): Trip
+Cross References: Use Case: Book a Trip
 Preconditions:
-- The application has started successfully.
-- The terminal (console) is available for input and output.
+- Client has selected a valid connection from search results.
+- Traveller information (name, age, id) is provided for each passenger.
+- Connection exists in the routes catalog.
 Postconditions:
-- Prompts the user for input (departure city, arrival city, transfer time, max connections, sorting option).
-- Displays search results or appropriate messages to the user.
-- Handles user input and output for the main connection search workflow.
+- A Trip is created with a unique alphanumeric ID.
+- For each traveller, a Reservation is created with a unique Ticket.
+- All travellers are registered in the ClientRepository.
+- Trip is persisted to CSV storage.
+- Trip object is returned with all reservations.
+
+Contract CO4: viewTrips
+Operation: findTripsByTraveller(lastName: String, travellerId: String): List<Trip>
+Cross References: Use Case: View Trips
+Preconditions:
+- Client provides valid lastName and travellerId.
+- Trip records exist in CSV storage.
+Postconditions:
+- Returns a list of all trips where at least one reservation 
+  matches the provided lastName and travellerId.
+- If no trips are found, returns an empty list.
+- Each Trip contains all its reservations with full details 
+  (traveller info, connection info, ticket number).
