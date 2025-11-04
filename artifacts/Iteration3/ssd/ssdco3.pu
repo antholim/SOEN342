@@ -1,0 +1,39 @@
+@startuml
+participant Client
+participant ":BookingService"
+participant ":TripCSVRepository"
+participant ":ClientRepository"
+
+note left of Client
+Contract CO3: bookTrip
+Operation: bookTrip(travellers: List<Traveller>, connection: Connection): Trip
+Cross References: Use Case: Book a Trip
+Preconditions:
+- Client has selected a valid connection from search results.
+- Traveller information (name, age, id) is provided for each passenger.
+- Connection exists in the routes catalog.
+Postconditions:
+- A Trip is created with a unique alphanumeric ID.
+- For each traveller, a Reservation is created with a unique Ticket.
+- All travellers are registered in the ClientRepository.
+- Trip is persisted to CSV storage.
+- Trip object is returned with all reservations.
+end note
+
+Client -> ":BookingService" : bookTrip(travellers, connection)
+activate ":BookingService"
+
+loop for each traveller
+    ":BookingService" -> ":ClientRepository" : save(traveller)
+    ":BookingService" -> ":BookingService" : generateTicket()
+    ":BookingService" -> ":BookingService" : createReservation(traveller, connection, ticket)
+end
+
+":BookingService" -> ":BookingService" : generateTripId()
+":BookingService" -> ":BookingService" : createTrip(tripId, reservations)
+":BookingService" -> ":TripCSVRepository" : saveTrip(trip)
+":TripCSVRepository" --> ":BookingService" : success
+":BookingService" --> Client : trip
+
+deactivate ":BookingService"
+@enduml

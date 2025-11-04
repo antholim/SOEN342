@@ -1,0 +1,18 @@
+@startuml
+participant Console
+participant ":RoutesDB"
+participant ":Routes"
+
+note left of Console
+Contract CO2:      Sort results
+Operation:         sortResults(sortingParameter: String, sortingOrder: String)
+Cross References:  Use Case: Sort results
+Preconditions:     - The results list is not empty
+                   - The attribute the user searches for is a valid attribute
+Postconditions:    The results list is sorted and returned
+end note
+
+Console -> ":RoutesDB" : sortResults(sortingParameter: String, sortingOrder: String)
+":RoutesDB" -> ":Routes" : sortResults(sortingParameter: String, sortingOrder: String)
+":Routes" --> Console : resultsList
+@enduml
