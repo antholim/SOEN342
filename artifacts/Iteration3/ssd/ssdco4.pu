@@ -1,0 +1,31 @@
+@startuml
+participant Client
+participant ":TripService"
+participant ":ClientDBRepository"
+participant ":TripDBRepository"
+
+note left of Client
+Contract CO4: viewTrips
+Operation: findTripsByTraveller(lastName: String, travellerId: String): List<Trip>
+Cross References: Use Case: View Trips
+Preconditions:
+- Client provides valid lastName and travellerId.
+- Database connection is available.
+Postconditions:
+- Returns all trips from the relational database where at least one reservation matches the provided credentials.
+- Each Trip includes details from TRIP, CLIENT, CONNECTION, TICKET, and RESERVATION tables.
+- If no trips are found, returns an empty list.
+end note
+
+Client -> ":TripService" : findTripsByTraveller(lastName, travellerId)
+activate ":TripService"
+
+":TripService" -> ":ClientDBRepository" : findClientByCredentials(lastName, travellerId)
+":ClientDBRepository" --> ":TripService" : client_id
+
+":TripService" -> ":TripDBRepository" : findTripsByClientId(client_id)
+":TripDBRepository" --> ":TripService" : listOfTrips
+
+":TripService" --> Client : trips (trip_id, connections, tickets, travellers)
+deactivate ":TripService"
+@enduml

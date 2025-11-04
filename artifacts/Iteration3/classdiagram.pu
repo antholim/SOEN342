@@ -1,0 +1,144 @@
+@startuml
+
+package model {
+  class Record {
+    - routeId: int
+    - departureCity: String
+    - arrivalCity: String
+    - departureTime: LocalTime
+    - arrivalTime: LocalTime
+    - trainType: String
+    - daysOfOperation: Set<DayOfWeek>
+    - firstClassTicketRate: double
+    - secondClassTicketRate: double
+    + getRouteId(): int
+    + getDepartureCity(): String
+    + getArrivalCity(): String
+    + getDepartureTime(): LocalTime
+    + getArrivalTime(): LocalTime
+    + getTrainType(): String
+    + getDaysOfOperation(): Set<DayOfWeek>
+    + getFirstClassRate(): double
+    + getSecondClassRate(): double
+  }
+
+  class Connection {
+    - connectionId: int
+    - record: Record
+    + Connection(record: Record)
+    + from(): String
+    + to(): String
+    + depTime(): LocalTime
+    + arrTime(): LocalTime
+    + firstRate(): double
+    + secondRate(): double
+    + toString(): String
+  }
+
+  class Trip {
+    - tripId: int
+    - bookingDate: LocalDate
+    - reservations: List<Reservation>
+    + Trip(tripId: int)
+    + addReservation(reservation: Reservation): void
+    + reservations(): List<Reservation>
+    + tripId(): int
+  }
+
+  class Reservation {
+    - reservationId: int
+    - traveller: Traveller
+    - connection: Connection
+    - ticket: Ticket
+    + Reservation(traveller: Traveller, connection: Connection, ticket: Ticket)
+    + traveller(): Traveller
+    + connection(): Connection
+    + ticket(): Ticket
+  }
+
+  class Traveller {
+    - clientId: int
+    - firstName: String
+    - lastName: String
+    - age: int
+    - governmentId: String
+    + Traveller(firstName: String, lastName: String, age: int, governmentId: String)
+    + firstName(): String
+    + lastName(): String
+    + age(): int
+    + governmentId(): String
+    + equals(o: Object): boolean
+    + hashCode(): int
+  }
+
+  class Ticket {
+    - ticketNumber: int
+    + Ticket(ticketNumber: int)
+    + number(): int
+  }
+}
+
+package repositories {
+  class RoutesDB {
+    + loadAll(): List<Record>
+    + getRoutes(): List<Record>
+  }
+
+  class TripDBRepository {
+    + saveTrip(trip: Trip): void
+    + findTripsByClientId(clientId: int): List<Trip>
+  }
+
+  class ClientDBRepository {
+    + findOrCreateClient(traveller: Traveller): int
+    + findClientByCredentials(lastName: String, governmentId: String): Traveller
+  }
+}
+
+package service {
+  class BookingService {
+    - tripRepo: repositories.TripDBRepository
+    - clientRepo: repositories.ClientDBRepository
+    + BookingService(tripRepo: TripDBRepository, clientRepo: ClientDBRepository)
+    + bookTrip(travellers: List<Traveller>, connection: Connection): Trip
+  }
+
+  class SearchService {
+    - routesDB: repositories.RoutesDB
+    + SearchService(routesDB: RoutesDB)
+    + findConnections(origin: String, destination: String, day: DayOfWeek): List<Connection>
+    + sortConnections(connections: List<Connection>, criterion: String): List<Connection>
+  }
+}
+
+class Main {
+  + main(String[]): void
+}
+
+'========================
+' Relationships
+'========================
+Main --> SearchService
+Main --> BookingService
+
+SearchService --> RoutesDB : uses
+SearchService --> Connection : returns
+
+BookingService --> TripDBRepository : uses
+BookingService --> ClientDBRepository : uses
+BookingService ..> Trip : creates
+BookingService ..> Traveller : uses
+BookingService ..> Reservation : creates
+BookingService ..> Ticket : creates
+BookingService ..> Connection : uses
+
+TripDBRepository --> Trip
+ClientDBRepository --> Traveller
+RoutesDB --> Record
+
+Trip *-- Reservation
+Reservation *-- Traveller
+Reservation *-- Connection
+Reservation *-- Ticket
+
+@enduml

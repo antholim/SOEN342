@@ -1,0 +1,42 @@
+@startuml
+
+actor Client
+participant Main
+participant BookingService
+participant TripDBRepository
+participant ClientDBRepository
+participant IdGenerator
+
+== Book a Trip ==
+Client -> Main : select route/connection to book
+Main -> Client : prompt for travellers info
+Client -> Main : enter travellers data
+
+Main -> BookingService : bookTrip(travellers, connection)
+BookingService -> IdGenerator : newTripId(auto-generated)
+IdGenerator --> BookingService : tripId
+
+loop for each traveller
+  BookingService -> ClientDBRepository : findOrCreateClient(traveller)
+  ClientDBRepository --> BookingService : client_id
+  BookingService -> IdGenerator : nextTicket()
+  IdGenerator --> BookingService : ticketNumber
+end
+
+BookingService -> TripDBRepository : saveTrip(trip, reservations, connection)
+TripDBRepository --> BookingService : tripId
+BookingService --> Main : Trip object
+Main -> Client : display booking confirmation (tripId, tickets)
+
+== View Trips ==
+Client -> Main : request "View My Trips"
+Main -> Client : prompt for credentials
+Client -> Main : enter lastName, travellerId
+
+Main -> ClientDBRepository : findClientByCredentials(lastName, travellerId)
+ClientDBRepository --> Main : client_id
+Main -> TripDBRepository : findTripsByClientId(client_id)
+TripDBRepository --> Main : List<Trip>
+Main -> Client : display trips with details
+
+@enduml

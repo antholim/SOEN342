@@ -1,0 +1,130 @@
+@startuml
+
+'========================
+' Core Entities
+'========================
+class City {
+  +cityId: int
+  +name: String
+}
+
+class Route {
+  +routeId: int
+  +departureCity: String
+  +arrivalCity: String
+  +departureTime: LocalTime
+  +arrivalTime: LocalTime
+  +trainType: String
+  +operatingDays: Set<DayOfWeek>
+  +firstClassFare: double
+  +secondClassFare: double
+}
+
+enum DayOfWeek {
+  MONDAY
+  TUESDAY
+  WEDNESDAY
+  THURSDAY
+  FRIDAY
+  SATURDAY
+  SUNDAY
+}
+
+class Connection {
+  +connectionId: int
+  +route: Route
+}
+
+'========================
+' Booking & Client Domain
+'========================
+class Trip {
+  +tripId: int
+  +bookingDate: LocalDate
+  +reservations: List<Reservation>
+}
+
+class Reservation {
+  +reservationId: int
+  +traveller: Traveller
+  +connection: Connection
+  +ticket: Ticket
+}
+
+class Traveller {
+  +clientId: int
+  +firstName: String
+  +lastName: String
+  +age: int
+  +governmentId: String
+}
+
+class Ticket {
+  +ticketNumber: int
+}
+
+'========================
+' Search Domain
+'========================
+class SearchCriteria {
+  +origin: String
+  +destination: String
+  +trainType: String
+  +operatingDay: DayOfWeek
+  +maxFirstClassPrice: double
+  +maxSecondClassPrice: double
+  +minDepartureTime: LocalTime
+  +maxDepartureTime: LocalTime
+  +maxLegDuration: int
+  +minTransferMinutes: int
+  +maxConnections: int
+}
+
+enum SortingPreference {
+  DEPARTURE_TIME
+  DURATION
+  PRICE_FIRST
+  PRICE_SECOND
+}
+
+'========================
+' Persistence Layer
+'========================
+class TripDBRepository {
+  +saveTrip(trip: Trip): void
+  +findTripsByClientId(clientId: int): List<Trip>
+}
+
+class ClientDBRepository {
+  +findOrCreateClient(traveller: Traveller): int
+  +findClientByCredentials(lastName: String, travellerId: String): Traveller
+}
+
+class RoutesDB {
+  +getRoutes(): List<Route>
+  +loadAll(): void
+}
+
+'========================
+' Relationships
+'========================
+Route "0..*" --> "1" City : departure
+Route "0..*" --> "1" City : arrival
+Route "1" o-- "1..*" DayOfWeek : operates on
+
+Connection "1" *-- "1" Route : uses
+
+Trip "1" *-- "1..*" Reservation : contains
+Reservation "1" *-- "1" Traveller : for
+Reservation "1" *-- "1" Connection : on
+Reservation "1" *-- "1" Ticket : documented by
+
+SearchCriteria "1" --> "1" City : origin
+SearchCriteria "1" --> "1" City : destination
+SearchCriteria "0..1" --> "1" SortingPreference : sort by
+
+TripDBRepository --> Trip
+ClientDBRepository --> Traveller
+RoutesDB --> Route
+
+@enduml
