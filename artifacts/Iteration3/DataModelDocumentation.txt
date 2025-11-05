@@ -1,0 +1,69 @@
+
+DATABASE SCHEMA
+
+----------------------------------------------------------------------------
+	1.	ROUTES TABLE
+
+----------------------------------------------------------------------------
+
+CREATE TABLE routes (
+route_id TEXT PRIMARY KEY,
+departure_city TEXT NOT NULL,
+arrival_city TEXT NOT NULL,
+departure_time TEXT NOT NULL,
+arrival_time TEXT NOT NULL,
+train_type TEXT NOT NULL,
+days_of_operation TEXT NOT NULL,
+first_class_rate REAL NOT NULL,
+second_class_rate REAL NOT NULL
+);
+
+Primary Key: route_id
+Alternate Key: (departure_city, arrival_city, departure_time, train_type)
+All attributes are atomic and fully dependent on the primary key.
+
+----------------------------------------------------------------------------
+
+	2.	TRAVELLERS TABLE
+
+----------------------------------------------------------------------------
+
+CREATE TABLE travellers (
+traveller_id TEXT PRIMARY KEY,
+first_name TEXT NOT NULL,
+last_name TEXT NOT NULL,
+age INTEGER NOT NULL
+);
+
+Primary Key: traveller_id
+Functional Dependency: traveller_id → (first_name, last_name, age)
+
+----------------------------------------------------------------------------
+
+	3.	TRIPS TABLE
+
+----------------------------------------------------------------------------
+
+CREATE TABLE trips (
+trip_id INTEGER PRIMARY KEY AUTOINCREMENT
+);
+
+Primary Key: trip_id (surrogate key, auto-increment integer)
+
+----------------------------------------------------------------------------
+
+	4.	RESERVATIONS TABLE
+
+----------------------------------------------------------------------------
+CREATE TABLE reservations (
+reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
+trip_id INTEGER NOT NULL,
+ticket_number INTEGER NOT NULL,
+traveller_id TEXT NOT NULL,
+route_id TEXT NOT NULL,
+Primary Key: reservation_id
+);
+Foreign Keys:
+	•	trip_id → trips(trip_id)
+	•	traveller_id → travellers(traveller_id)
+	•	route_id → routes(route_id)

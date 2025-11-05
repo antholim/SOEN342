@@ -15,7 +15,7 @@ Postconditions:
 	•	Returns a list of possible connection paths (each path is a list of Connection objects) from the origin to the destination, satisfying the minimum transfer time and maximum number of legs.
 	•	If no connections are found, returns an empty list.
 
-⸻
+----------------------------------------------------------------------------
 
 Contract CO2: sortConnections
 
@@ -32,7 +32,7 @@ Preconditions:
 Postconditions:
 	•	The list of connections is sorted in place according to the selected criterion (total duration, first-class price, or second-class price).
 
-⸻
+----------------------------------------------------------------------------
 
 Contract CO3: bookTrip
 
@@ -55,7 +55,7 @@ Postconditions:
 	•	Trip and all related records are persisted in the relational database (TRIP, RESERVATION, TICKET, CLIENT).
 	•	Trip object is returned with all reservations and identifiers.
 
-⸻
+----------------------------------------------------------------------------
 
 Contract CO4: viewTrips
 
