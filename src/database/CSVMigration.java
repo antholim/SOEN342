@@ -76,10 +76,10 @@ public class CSVMigration {
                 )
                 """);
             
-            // Create trips table
+            // Create trips table with auto-increment numeric ID
             stmt.execute("""
                 CREATE TABLE trips (
-                    trip_id TEXT PRIMARY KEY
+                    trip_id INTEGER PRIMARY KEY AUTOINCREMENT
                 )
                 """);
             
@@ -87,8 +87,8 @@ public class CSVMigration {
             stmt.execute("""
                 CREATE TABLE reservations (
                     reservation_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    trip_id TEXT NOT NULL,
-                    ticket_number TEXT NOT NULL,
+                    trip_id INTEGER NOT NULL,
+                    ticket_number INTEGER NOT NULL,
                     traveller_id TEXT NOT NULL,
                     route_id TEXT NOT NULL,
                     FOREIGN KEY (trip_id) REFERENCES trips(trip_id),
@@ -143,9 +143,9 @@ public class CSVMigration {
 
     /**
      * Migrates trip and traveller data from CSV to database
+     * Maps old alphanumeric trip IDs to new numeric IDs
      */
     public void migrateTrips(String filePath) throws SQLException {
-        String insertTripSQL = "INSERT OR IGNORE INTO trips (trip_id) VALUES (?)";
         String insertTravellerSQL = """
             INSERT OR IGNORE INTO travellers (traveller_id, first_name, last_name, age)
             VALUES (?, ?, ?, ?)
@@ -156,7 +156,6 @@ public class CSVMigration {
             """;
         
         try (Connection conn = DriverManager.getConnection(DB_URL);
-             PreparedStatement tripStmt = conn.prepareStatement(insertTripSQL);
              PreparedStatement travellerStmt = conn.prepareStatement(insertTravellerSQL);
              PreparedStatement reservationStmt = conn.prepareStatement(insertReservationSQL);
              BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
@@ -166,9 +165,11 @@ public class CSVMigration {
             // Skip header
             reader.readLine();
             
-            int tripCount = 0;
             int travellerCount = 0;
             int reservationCount = 0;
+            
+            // Map old alphanumeric trip IDs to new numeric ones
+            java.util.Map<String, Long> tripIdMap = new java.util.HashMap<>();
             
             String line;
             while ((line = reader.readLine()) != null) {
@@ -176,8 +177,8 @@ public class CSVMigration {
                 
                 if (values.length < 14) continue; // Skip malformed lines
                 
-                String tripId = values[0].trim();
-                String ticketNumber = values[1].trim();
+                String oldTripId = values[0].trim();
+                long ticketNumber = Long.parseLong(values[1].trim());
                 String firstName = values[2].trim();
                 String lastName = values[3].trim();
                 int age = Integer.parseInt(values[4].trim());
@@ -191,10 +192,24 @@ public class CSVMigration {
                 double firstClassRate = Double.parseDouble(values[12].trim());
                 double secondClassRate = Double.parseDouble(values[13].trim());
                 
-                // Insert trip
-                tripStmt.setString(1, tripId);
-                tripStmt.addBatch();
-                tripCount++;
+                // Get or create numeric trip ID
+                long numericTripId;
+                if (tripIdMap.containsKey(oldTripId)) {
+                    numericTripId = tripIdMap.get(oldTripId);
+                } else {
+                    // Create new trip with auto-increment ID
+                    try (Statement stmt = conn.createStatement()) {
+                        stmt.executeUpdate("INSERT INTO trips (trip_id) VALUES (NULL)");
+                        try (ResultSet rs = stmt.executeQuery("SELECT last_insert_rowid()")) {
+                            if (rs.next()) {
+                                numericTripId = rs.getLong(1);
+                                tripIdMap.put(oldTripId, numericTripId);
+                            } else {
+                                continue;
+                            }
+                        }
+                    }
+                }
                 
                 // Insert traveller
                 travellerStmt.setString(1, travellerId);
@@ -211,23 +226,22 @@ public class CSVMigration {
                 
                 if (routeId != null) {
                     // Insert reservation
-                    reservationStmt.setString(1, tripId);
-                    reservationStmt.setString(2, ticketNumber);
+                    reservationStmt.setLong(1, numericTripId);
+                    reservationStmt.setLong(2, ticketNumber);
                     reservationStmt.setString(3, travellerId);
                     reservationStmt.setString(4, routeId);
                     reservationStmt.addBatch();
                     reservationCount++;
                 } else {
-                    System.err.println("Warning: No matching route found for trip " + tripId);
+                    System.err.println("Warning: No matching route found for trip " + oldTripId);
                 }
             }
             
-            tripStmt.executeBatch();
             travellerStmt.executeBatch();
             reservationStmt.executeBatch();
             conn.commit();
             
-            System.out.println("Migrated " + tripCount + " trips (unique count may be lower)");
+            System.out.println("Migrated " + tripIdMap.size() + " trips (converted to numeric IDs)");
             System.out.println("Migrated " + travellerCount + " travellers (unique count may be lower)");
             System.out.println("Migrated " + reservationCount + " reservations");
             

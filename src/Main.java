@@ -5,8 +5,8 @@ import model.Connection;
 import model.TimeUtils;
 import model.Trip;
 import model.Traveller;
-import repositories.CSVRepository;
-import repositories.TripCSVRepository;
+import repositories.RouteRepository;
+import repositories.TripDatabaseRepository;
 import repositories.ClientRepository;
 import service.ConnectionFinder;
 import service.ConnectionSorter;
@@ -14,10 +14,10 @@ import service.AdvancedSearch;
 import service.BookingService;
 
 public class Main {
-    public static CSVRepository repository = CSVRepository.getInstance();
+    public static RouteRepository routeRepo = RouteRepository.getInstance();
     public static List<Record> listOfRoutes;
     public static Scanner sc = new Scanner(System.in);
-    public static TripCSVRepository tripRepo = new TripCSVRepository("src/data/trips.csv");
+    public static TripDatabaseRepository tripRepo = new TripDatabaseRepository();
     public static ClientRepository clientRepo = new ClientRepository();
     public static BookingService booking = new BookingService(tripRepo, clientRepo);
 
@@ -252,11 +252,11 @@ public class Main {
     }
 
     public static void bootstrap() {
-        System.out.println("Loading EU Rail Network data...");
-        listOfRoutes = repository.getRoutes("src/data/eu_rail_network.csv");
+        System.out.println("Loading EU Rail Network data from database...");
+        listOfRoutes = routeRepo.getRoutes();
         System.out.println("✓ Loaded " + listOfRoutes.size() + " routes.");
         
-        System.out.println("Loading existing trips...");
+        System.out.println("Loading existing trips from database...");
         List<Trip> existingTrips = tripRepo.loadTrips();
         System.out.println("✓ Loaded " + existingTrips.size() + " trips.");
     }

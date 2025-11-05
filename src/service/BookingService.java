@@ -6,16 +6,16 @@ import model.Ticket;
 import model.Trip;
 import model.Traveller;
 import repositories.ClientRepository;
-import repositories.TripCSVRepository; // Change this import
+import repositories.TripDatabaseRepository;
 
 import java.util.List;
 import java.util.StringJoiner;
 
 public class BookingService {
-    private final TripCSVRepository tripRepo; // Change type
+    private final TripDatabaseRepository tripRepo;
     private final ClientRepository clientRepo;
 
-    public BookingService(TripCSVRepository tripRepo, ClientRepository clientRepo) { // Change parameter type
+    public BookingService(TripDatabaseRepository tripRepo, ClientRepository clientRepo) {
         this.tripRepo = tripRepo;
         this.clientRepo = clientRepo;
     }
@@ -34,15 +34,19 @@ public class BookingService {
     }
 
     private Trip persist(List<Traveller> travellers, String itinerary, Connection connectionAnchor) {
-        String tripId = IdGenerator.newTripId(10);
-        Trip t = new Trip(tripId);
+        // Create a temporary trip with placeholder ID
+        Trip t = new Trip("temp");
         for (Traveller traveller : travellers) {
             clientRepo.save(traveller);
             var ticket = new Ticket(IdGenerator.nextTicket());
             var reservation = new Reservation(traveller, connectionAnchor, ticket);
             t.addReservation(reservation);
         }
-        tripRepo.saveTrip(t); // Changed from save() to saveTrip()
-        return t;
+        
+        // Save to database and get the actual numeric trip ID
+        long numericTripId = tripRepo.saveTrip(t);
+        
+        // Return a new Trip object with the correct numeric ID
+        return new Trip(String.valueOf(numericTripId));
     }
 }

@@ -1,6 +1,5 @@
 /out
 .idea
-SOEN342.iml
 Main.class
 # Ignore compiled class files
 *.class
