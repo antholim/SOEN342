@@ -14,6 +14,7 @@ public class ConnectionFinder {
 
     private static final DateTimeFormatter TIME_FMT = DateTimeFormatter.ofPattern("HH:mm");
     private final Map<String, List<Record>> routesByDepartureCity;
+    private final LayoverPolicy layoverPolicy = LayoverPolicy.getInstance();
 
     public ConnectionFinder(List<Record> allRoutes) {
         this.routesByDepartureCity = allRoutes.stream()
@@ -181,9 +182,12 @@ public class ConnectionFinder {
                         .map(Connection::new)
                         .collect(Collectors.toList());
 
-                // Final validation: check if the entire path has valid operating days
-                if (searchDay == null || getValidDaysForPath(validConnection).contains(searchDay)) {
-                    allConnections.add(validConnection);
+                // Enforce layover policy for the whole path
+                if (layoverPolicy.isPathAllowed(validConnection)) {
+                    // Final validation: check if the entire path has valid operating days
+                    if (searchDay == null || getValidDaysForPath(validConnection).contains(searchDay)) {
+                        allConnections.add(validConnection);
+                    }
                 }
             } else {
                 exploreConnections(nextCity, targetCity, minTransferMinutes,

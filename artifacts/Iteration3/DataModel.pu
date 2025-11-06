@@ -1,0 +1,38 @@
+@startuml DataModel
+
+
+hide circle
+
+entity "routes" as routes {
+	route_id : <<PK>>
+	departure_city : VARCHAR
+	arrival_city : VARCHAR
+	departure_time : VARCHAR
+	arrival_time : VARCHAR
+	train_type : VARCHAR
+	days_of_operation : VARCHAR
+	first_class_rate : DOUBLE
+	second_class_rate : DOUBLE
+}
+
+entity "travellers" as travellers {
+	traveller_id : <<PK>>
+	first_name : VARCHAR
+	last_name : VARCHAR
+	age : INT
+}
+
+entity "trips" as trips {
+	trip_id : INT <<PK, AUTOINCREMENT>>
+}
+
+entity "reservations" as reservations {
+	reservation_id : INT <<PK, AUTOINCREMENT>>
+	trip_id : INT <<FK>>
+	ticket_number : INT
+	traveller_id : <<FK>>
+	route_id : <<FK>>
+}
+
+@enduml
+
