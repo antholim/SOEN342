@@ -8,6 +8,3 @@ inv HasConnection:
 
 inv HasTicket:
      self.ticket <> null
-
-inv HasUniqueId:
-     self.
