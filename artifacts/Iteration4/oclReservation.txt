@@ -1,0 +1,13 @@
+context Reservation
+
+inv HasTraveller:
+     self.traveller <> null
+
+inv HasConnection:
+     self.connection <> null
+
+inv HasTicket:
+     self.ticket <> null
+
+inv HasUniqueId:
+     self.
