@@ -1,0 +1,56 @@
+context BookingService::persist(
+     travellers: List(Traveller),
+     itinerary: String,
+     connectionAnchor: Connection
+): Trip
+
+pre : 
+    ValidTravellers:
+        travellers->forAll(t : Traveller |
+            t.firstName() <> '' and
+            t.lastName() <> '' and
+            t.governmentId() <> '' and
+            t.age() > 0)
+
+    itinerary:
+        itinerary <> null
+
+    HasConnectionAnchor:
+        connectionAnchor <> null
+
+    NonEmptyTravellerList:
+        travellers -> notEmpty()
+
+    NoDuplicateReservationForConnection:
+        travellers->forAll(t : Traveller |
+            self.tripRepo.findTripsByTraveller(
+                t.lastName,                    
+                t.governmentId
+            ) 
+            ->collect(reservations)
+            ->collect(connection)
+            ->excludes(connectionAnchor)
+        )
+
+post :
+    TripCreated:
+        result <> null
+    
+    CorrectReservationCount:
+        result.reservations() ->size() >= 1
+    
+    EachReservationDocumentedByTicket:
+        result.reservations() -> forAll(
+            r : Reservation |
+            r.ticket <> null
+        )
+    CorrectConnection:
+        result.reservations()->forAll(r : Reservation |
+            r.connection = connectionAnchor)
+
+    UniqueTickets:
+        result.reservations()->forAll(r1, r2 : Reservation |
+            r1 <> r2 implies r1.ticket.number() <> r2.ticket.number()
+            )
+ 
+
