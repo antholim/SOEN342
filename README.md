@@ -15,7 +15,6 @@ A Java command-line application for searching train routes across Europe with su
 ## Prerequisites
 
 - Java JDK 11 or higher
-- CSV data file at `src/data/eu_rail_network.csv`
 
 ## Installation
 
