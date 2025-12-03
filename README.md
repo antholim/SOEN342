@@ -59,6 +59,8 @@ If no direct routes are found, the system searches for multi-leg connections wit
 ## Example
 
 ```
+Route search:
+
 Departure city: Paris
 Arrival city: Berlin
 Train type: 
@@ -68,6 +70,32 @@ Max 2nd class price (€): 100
 Min departure time (HH:MM): 08:00
 Max departure time (HH:MM): 20:00
 Max duration (minutes): 600
+Min transfer minutes : 30
+Max connections: 2
+
+--- Search Results ---
+Choose a sorting option:
+0
+--- Search Results Sorted ---
+Book one of the following trips: y
+Enter route # to book (1-1): 1
+Number of travellers: 2 
+Traveller 1:
+  First name: Anthony
+  Last  name: Lim
+  Age: 22
+  ID (passport/gov): 1234 
+Traveller 2:
+  First name: Andrew
+  Last  name: Ungureanu
+  Age: 21
+  ID (passport/gov): 12345 
+  
+
+View my trips:
+Enter your last name: Lim
+Enter your ID (passport/gov): 1234
+
 ```
 
 ## Features
@@ -77,4 +105,8 @@ Max duration (minutes): 600
 - Sort by time, duration, or price
 - Automatic day transition handling
 - Transfer time validation
+- View my trips
+- No Layovers during night (10pm-6am)
 
+Demo video:
+https://youtu.be/Z8Uq6ZcrxOE
